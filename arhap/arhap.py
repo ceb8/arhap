@@ -140,6 +140,28 @@ def find_nearest(arr, val):
     diff_arr = np.abs(arr - val)
     return np.where(diff_arr == diff_arr.min())[0][0]
 
+def combine_intervals(data_table, start_col, end_col, max_dist):
+    """
+    Take a data table and two columns that represent the beginning/end of intervals,
+    and the maximum distance between intervals to consider them continuous, and calculate
+    the interval set.  data_table should be sorted on the start column.
+    """
+
+    interval_table = data_table[start_col, end_col]
+    
+    while True:
+        neg_difs = (interval_table[start_col][1:] - (interval_table[end_col] + max_dist)[:-1]) < 0
+        noneq_ints = (interval_table[start_col][1:] != interval_table[start_col][:-1]) & \
+                     (interval_table[end_col][1:] != interval_table[end_col][:-1])
+        overlap_inds = np.where(neg_difs & noneq_ints)[0]
+        if len(overlap_inds) == 0:
+            break
+        for i in overlap_inds:
+            interval_table[start_col][i+1] = interval_table[start_col][i]
+            interval_table[end_col][i] = interval_table[end_col][i+1]
+        
+    return interval_table
+
 
 ## Plotting related ##
 
