@@ -4,6 +4,8 @@ from astropy.time import Time
 from astropy import units as u
 from astropy import constants as c
 
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PatchCollection
 
 ## Mission constants ##
 
@@ -201,3 +203,24 @@ def align_yaxis(axes):
     new_lims = y_new_lims_normalized * y_mags
     for i, ax in enumerate(axes):
         ax.set_ylim(new_lims[i])    
+
+
+
+def make_error_boxes(ax, xdata, ydata, xerror, yerror, facecolor='r',
+                     edgecolor='None', alpha=0.5):
+    """
+    Add error boxes to axis ax.
+
+    From https://matplotlib.org/stable/gallery/statistics/errorbars_and_boxes.html (lightly modified).
+    """
+
+    # Loop over data points; create box from errors at each point
+    errorboxes = [Rectangle((x - xe[0], y - ye[0]), xe.sum(), ye.sum())
+                  for x, y, xe, ye in zip(xdata, ydata, xerror.T, yerror.T)]
+
+    # Create patch collection with specified colour/alpha
+    pc = PatchCollection(errorboxes, facecolor=facecolor, alpha=alpha,
+                         edgecolor=edgecolor)
+
+    # Add collection to axes
+    ax.add_collection(pc)
