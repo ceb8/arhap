@@ -20,6 +20,18 @@ Kepler_zeropt = c.Constant('Kepler_zeropt', "Kepler flux at AB magnitude 12",
                            2.1*10**5, 'electron s-1', 0.0,
                            reference="https://archive.stsci.edu/kepler/manuals/KSCI-19033-002.pdf")
 
+Kepler_lc_exptime = c.Constant('Kepler_lc_exptime', "Kepler long cadence exposure time",
+                           1625.3467838829, 'second', 0.0,
+                           reference="Conversation with Susan Mullally")
+
+# GALEX
+GALEX_fwhm = c.Constant('GALEX_fwhm', "GALEX bandpass fwhm",
+                        795.65, 'angstrom', 0.0, system='cgs',
+                        reference="http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?id=GALEX/GALEX.NUV")
+
+GALEX_lamda = c.Constant('GALEX_lamda', "GALEX bandpass effective wavelength",
+                         2304.74, 'angstrom', 0.0, system='cgs',
+                         reference="http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?id=GALEX/GALEX.NUV")
 
 ## Time related ##
 
@@ -151,7 +163,7 @@ def combine_intervals(data_table, start_col, end_col, max_dist):
     
     while True:
         neg_difs = (interval_table[start_col][1:] - (interval_table[end_col] + max_dist)[:-1]) < 0
-        noneq_ints = (interval_table[start_col][1:] != interval_table[start_col][:-1]) & \
+        noneq_ints = (interval_table[start_col][1:] != interval_table[start_col][:-1]) | \
                      (interval_table[end_col][1:] != interval_table[end_col][:-1])
         overlap_inds = np.where(neg_difs & noneq_ints)[0]
         if len(overlap_inds) == 0:
