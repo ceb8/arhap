@@ -1,9 +1,12 @@
+from cycler import cycler
+
 import numpy as np
 
 from astropy.time import Time
 from astropy import units as u
 from astropy import constants as c
 
+import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 
@@ -224,3 +227,38 @@ def make_error_boxes(ax, xdata, ydata, xerror, yerror, facecolor='r',
 
     # Add collection to axes
     ax.add_collection(pc)
+
+
+def deduped_legend(ax, **kwargs):
+    """
+    From https://stackoverflow.com/a/56253636, with added kwarg pass-through.
+    """
+    
+    handles, labels = ax.get_legend_handles_labels()
+    unique = [(h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]]
+    ax.legend(*zip(*unique), **kwargs)
+
+
+def set_cycle_by_cmap(ax, cmap, length=50, cmap_lim=[0.1,0.9]):
+    """
+    Set color cycle of matplotlib axes object based on colormap.
+    Adapted from https://tonysyu.github.io/mpltools/api/mpltools.color.html#cycle-cmap.
+    
+    Parameters
+    ----------
+    cmap : str
+        Name of a matplotlib colormap (see matplotlib.pyplot.cm). 
+    cmap_lim: arr
+        Limit colormap to this range (0 <= start < stop <= 1). You should limit the
+        range of colormaps with light values (assuming a white background).
+    length : int
+        The number of colors in the cycle. When `length` is large (> ~10), it
+        is difficult to distinguish between successive lines because successive
+        colors are very similar.
+    ax : matplotlib axes
+        Axes to apply the color cycle too
+    """
+    cmap = getattr(plt.cm, cmap)
+    idx = np.linspace(cmap_lim[0], cmap_lim[1], num=length)
+    color_cycle = cmap(idx)
+    ax.set_prop_cycle(cycler(color=color_cycle))
