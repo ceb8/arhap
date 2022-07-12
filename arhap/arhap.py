@@ -153,7 +153,10 @@ def kepler_mag_to_count(mag):
 ## Array related ##    
 
 def find_nearest(arr, val):
-
+    """
+    Returns the index in arr whereto the value in arr that is closest to val. 
+    """
+    
     diff_arr = np.abs(arr - val)
     return np.where(diff_arr == diff_arr.min())[0][0]
 
