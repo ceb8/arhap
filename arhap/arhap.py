@@ -9,6 +9,8 @@ from astropy import constants as c
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
+from matplotlib.colors import ListedColormap
+
 
 ## Mission constants ##
 
@@ -182,6 +184,37 @@ def combine_intervals(data_table, start_col, end_col, max_dist):
         
     return interval_table
 
+def max_val(*arrs, absval=True):
+    """
+    Find the maximum value in one or more array-like objects.
+    If absval = True, the absolute values of the arrays are used.
+    """
+    
+    if absval:
+        args = np.abs(arrs)
+    else:
+        args = np.array(arrs)
+        
+    return np.nanmax(arrs)
+            
+def mid_points(bin_edges):
+    """
+    Given an array that represents the edges of some bins, return the midpoint.
+    This means the returned array will be 1 element shorter than the input array.
+    """
+
+    return (bin_edges[:-1] + bin_edges[1:])/2
+
+
+## Coordinate related ##
+
+def xy2polar(x, y, center=(0,0)):
+    """
+    Trans form cartesian coordinates into polar coordinates,
+    with respect to the given center point.
+    """
+    z = (x-center[0]) + 1j*(y-center[0])
+    return ( np.abs(z), (np.angle(z, deg=True)%360)*u.deg )
 
 ## Plotting related ##
 
@@ -265,3 +298,76 @@ def set_cycle_by_cmap(ax, cmap, length=50, cmap_lim=[0.1,0.9]):
     idx = np.linspace(cmap_lim[0], cmap_lim[1], num=length)
     color_cycle = cmap(idx)
     ax.set_prop_cycle(cycler(color=color_cycle))
+
+    
+def magenta_blue_div_cmap():
+    """
+    Returns a magenta to white to blue diverging colormap.
+
+    From hex #000161 to #0002c8 white to #c70064 to #54002a
+    """
+
+    N = 64
+    vals = np.ones((4*N, 4))
+
+    vals[:N, 0] = np.zeros(N)
+    vals[:N, 1] = np.linspace(1/256, 2/256, N)
+    vals[:N, 2] = np.linspace(97/256, 201/256, N)
+    
+    vals[N:2*N, 0] = np.linspace(0, 1, N)
+    vals[N:2*N, 1] = np.linspace(2/256, 1, N)
+    vals[N:2*N, 2] = np.linspace(201/256, 1, N)
+
+    vals[2*N:3*N, 0] = np.linspace(1, 200/256, N)
+    vals[2*N:3*N, 1] = np.linspace(1, 0, N)
+    vals[2*N:3*N, 2] = np.linspace(1, 100/256, N)
+
+    vals[3*N:, 0] = np.linspace(200/256, 84/256, N)
+    vals[3*N:, 1] = np.zeros(N)
+    vals[3*N:, 2] = np.linspace(100/256, 42/256, N)
+
+    return ListedColormap(vals)
+
+
+def magenta_green_div_cmap():
+    """
+    Returns a magenta to white to green diverging colormap. 
+    """
+
+    N = 64
+    vals = np.ones((4*N, 4))
+
+    vals[:N, 0] = np.zeros(N)
+    vals[:N, 1] = np.linspace(77/256, 166/256, N)
+    vals[:N, 2] = np.linspace(5/256, 11/256, N)
+
+    vals[N:2*N, 0] = np.linspace(0, 1, N)
+    vals[N:2*N, 1] = np.linspace(166/256, 1, N)
+    vals[N:2*N, 2] = np.linspace(11/256, 1, N)
+
+    vals[2*N:3*N, 0] = np.linspace(1, 200/256, N)
+    vals[2*N:3*N, 1] = np.linspace(1, 0, N)
+    vals[2*N:3*N, 2] = np.linspace(1, 100/256, N)
+
+    vals[3*N:, 0] = np.linspace(200/256, 84/256, N)
+    vals[3*N:, 1] = np.zeros(N)
+    vals[3*N:, 2] = np.linspace(100/256, 42/256, N)
+
+    return ListedColormap(vals)
+
+
+def plot_sphere(ax, radius=1, alpha=1, color=None):
+    """
+    Plot a sphere of the given radius on axis ax.
+    The axis is assumed to be 3D.
+    """
+
+    theta,phi = np.meshgrid(np.radians(np.arange(-180,180)),np.radians(np.arange(-90,90)))
+
+    unit_x = np.cos(phi)*np.sin(theta)
+    unit_y = np.sin(phi)*np.sin(theta)
+    unit_z = np.cos(theta)
+
+    ax.plot_surface(radius*unit_x, radius*unit_y, radius*unit_z, alpha=alpha, color=color)
+
+
